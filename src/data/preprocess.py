@@ -1,21 +1,20 @@
 import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
-from config import Config
+from src.config import Config
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def load_data(path: str) -> pd.DataFrame:
+    """Load raw CSV data from the specified path."""
     try:
-        data = pd.read_csv(path)
-        logger.info(f"Data loaded successfully from {path}")
-        return data
+        return pd.read_csv(path)
     except Exception as e:
-        logger.error(f"Error loading data: {e}")
+        logger.error(f"Failed to load data: {e}")
         raise
 
 def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean data and create domain-specific features."""
     df = df.copy()
     
     # remove unnecessary columns
@@ -35,11 +34,12 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
         
     return df
 
-def get_train_test_data(data: pd.DataFrame):
+def get_processed_split(data: pd.DataFrame):
+    """Applies engineering and returns train/test splits."""
     df = feature_engineering(data)
     
-    target_col = "Target" if "Target" in df.columns else df.columns[-1]
-    X = df.drop(columns=[target_col])
-    y = df[target_col]
+    target = "Target" if "Target" in df.columns else df.columns[-1]
+    X = df.drop(columns=[target])
+    y = df[target]
     
     return train_test_split(X, y, test_size=Config.TEST_SIZE, random_state=Config.RANDOM_STATE)

@@ -1,33 +1,30 @@
 import logging
-from src.data.preprocess import load_data, get_train_test_data
-from src.model import get_model_pipeline, train_model, evaluate_model
-from config import Config
+from src.data.preprocess import load_data, get_processed_split
+from src.model import train_and_optimize, evaluate
+from src.config import Config
 
-# تنظیمات لاگینگ برای کل پروژه
+# Standard logging configuration
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-def main():
-    # 1. load data
-    df = load_data(Config.DATA_PATH)
+def run_pipeline():
+    # 1. Ingestion
+    raw_data = load_data(Config.DATA_PATH)
     
-    # 2. data splitting and engineering
-    X_train, X_test, y_train, y_test = get_train_test_data(df)
+    # 2. Preprocessing & Splitting
+    X_train, X_test, y_train, y_test = get_processed_split(raw_data)
     
-    # 3. create and train pipeline
-    pipeline = get_model_pipeline()
-    pipeline = train_model(pipeline, X_train, y_train)
+    # 3. Training & Optimization (MLflow Tracking happens inside)
+    best_model = train_and_optimize(X_train, y_train)
     
-    # 4. evaluate
-    acc, report = evaluate_model(pipeline, X_test, y_test)
+    # 4. Evaluation
+    accuracy, report = evaluate(best_model, X_test, y_test)
     
-    print("\n" + "="*30)
-    print(f"Final Model Accuracy: {acc:.4f}")
-    print("Full Classification Report:")
-    print(report)
-    print("="*30)
+    print("\n--- Final Results ---")
+    print(f"Accuracy: {accuracy:.4f}")
+    print("Report:\n", report)
 
 if __name__ == "__main__":
-    main()
+    run_pipeline()
