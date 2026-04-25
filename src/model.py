@@ -1,16 +1,28 @@
-from sklearn.ensemble import IsolationForest
+import logging
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import accuracy_score, classification_report
+from config import Config
 
-class Model:
-    def __init__(self, contamination=0.02, random_state=42):
-        self.contamination = contamination
-        self.random_state = random_state
-        self.model = None
-    
+logger = logging.getLogger(__name__)
 
-    def train_isolation_forest(self, X):
-        self.model = IsolationForest(
-            contamination=self.contamination,
-            random_state=self.random_state
-        )
-        self.model.fit(X)
-        return self.model
+def get_model_pipeline() -> Pipeline:
+    """create a machine learning pipeline with scaling and random forest classifier"""
+    pipeline = Pipeline([
+        ('scaler', StandardScaler()),
+        ('clf', RandomForestClassifier(**Config.MODEL_PARAMS))
+    ])
+    return pipeline
+
+def train_model(pipeline: Pipeline, X_train, y_train) -> Pipeline:
+    logger.info("Starting model training...")
+    pipeline.fit(X_train, y_train)
+    logger.info("Training completed.")
+    return pipeline
+
+def evaluate_model(pipeline: Pipeline, X_test, y_test):
+    predictions = pipeline.predict(X_test)
+    acc = accuracy_score(y_test, predictions)
+    report = classification_report(y_test, predictions)
+    return acc, report
