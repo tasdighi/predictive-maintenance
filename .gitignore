@@ -1,0 +1,26 @@
+# Python temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+env/
+venv/
+
+# MLflow logs and artifacts
+mlruns/
+mlflow.db
+
+# Model files
+models/
+*.joblib
+*.pkl
+
+# Data files (Added to ignore)
+*.csv
+src/data/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
